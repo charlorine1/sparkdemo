@@ -1,28 +1,28 @@
 package com.usst.spark.transformations;
 
+import java.util.Arrays;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.VoidFunction;
 
 /**
- * map 
- * 通过传入的函数处理每个元素，返回新的数据集。
- * 特点：输入一条，输出一条。
- *  
+ * flatMap
+ * 输入一条数据，输出0到多条数据。
  * @author root
  *
  */
-public class Operator_map {
-	
+public class Operator_flatMap {
 	public static void main(String[] args) {
 		SparkConf conf = new SparkConf();
 		conf.setMaster("local");
-		conf.setAppName("map");
+		conf.setAppName("flatMap");
+
 		JavaSparkContext jsc = new JavaSparkContext(conf);
-		JavaRDD<String> line = jsc.textFile("./data/words.txt");
-		JavaRDD<String> mapResult = line.map(new Function<String, String>() {
+		JavaRDD<String> lines = jsc.textFile("./data/words.txt");
+		JavaRDD<String> flatMapResult = lines.flatMap(new FlatMapFunction<String, String>() {
 
 			/**
 			 * 
@@ -30,14 +30,12 @@ public class Operator_map {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public String call(String s) throws Exception {
-				return s+"~1";
-			} 
-
-
+			public Iterable<String> call(String s) throws Exception {
+				return Arrays.asList(s.split(" "));
+			}
+			
 		});
-		
-		mapResult.foreach(new VoidFunction<String>() {
+		flatMapResult.foreach(new VoidFunction<String>() {
 			
 			/**
 			 * 
@@ -52,5 +50,4 @@ public class Operator_map {
 		
 		jsc.stop();
 	}
-
 }
